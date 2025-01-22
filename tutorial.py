@@ -2,7 +2,9 @@
 
 import os
 import openai
+import asyncio
 from openai import AsyncOpenAI
+from openai import OpenAI
 from dotenv import load_dotenv
 import time
 import speech_recognition as sr
@@ -16,9 +18,11 @@ language = 'en'
 from os.path import join, dirname
 import matplotlib.pyplot as plt
 # ^ matplotlib is great for visualising data and for testing purposes but usually not needed for production
-load_dotenv()
-openai.api_key= os.getenv("SECRET_KEY")
-model = 'gpt-3.5-turbo'
+
+load_dotenv() # load env variables
+
+openai.api_key= os.getenv("OPENAI_API_KEY")
+gpt_model = 'gpt-4o-mini'
 # Set up the speech recognition and text-to-speech engines
 r = sr.Recognizer()
 engine = pyttsx3.init("dummy")
@@ -60,23 +64,25 @@ def listen_and_respond(source):
                 continue
 
             # Send input to OpenAI API
-            client = AsyncOpenAI()
-            response = await client.chat.completions.create(model="gpt-3.5-turbo", messages=[{"role": "user", "content": f"{text}"}])
+            # client = AsyncOpenAI()
+            client = OpenAI()
+            response = client.chat.completions.create(model=gpt_model, messages=[{"role": "user", "content": f"{text}"}])
             response_text = response.choices[0].message.content
             print(response_text)
             #myobj = gTTS(text = response_text, lang = language, slow = False)
             #myobj.save("test.wav")
             #os.system("aplay test.wav")
-            # Speak the response
-            print("speaking")
-            os.system("espeak ' "+response_text + "'")
-            engine.say(response_text)
-            engine.runAndWait()
+
+            # # Speak the response
+            # print("speaking")
+            # os.system("espeak ' "+response_text + "'")
+            # engine.say(response_text)
+            # engine.runAndWait()
 
             if not audio:
                 listen_for_wake_word(source)
         except sr.UnknownValueError:
-            time.sleep(2)
+            time.sleep(10)
             print("Silence found, shutting up, listening...")
             listen_for_wake_word(source)
             break
@@ -90,4 +96,4 @@ def listen_and_respond(source):
 
 # Use the default microphone as the audio source
 with sr.Microphone() as source:
-    listen_for_wake_word(source)
+    (listen_for_wake_word(source))
