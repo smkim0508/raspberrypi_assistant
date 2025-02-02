@@ -25,7 +25,7 @@ openai.api_key= os.getenv("OPENAI_API_KEY")
 gpt_model = 'gpt-4o-mini'
 # Set up the speech recognition and text-to-speech engines
 r = sr.Recognizer()
-engine = pyttsx3.init("dummy")
+engine = pyttsx3.init() #initialize text to speech engine
 voice = engine.getProperty('voices')[1]
 engine.setProperty('voice', voice.id)
 name = "YOUR NAME HERE"
@@ -46,6 +46,7 @@ def listen_for_wake_word(source):
             if "hey" in text.lower():
                 print("Wake word detected.")
                 engine.say(np.random.choice(greetings))
+                # engine.say("hello world")
                 engine.runAndWait()
                 listen_and_respond(source)
                 break
@@ -69,15 +70,16 @@ def listen_and_respond(source):
             response = client.chat.completions.create(model=gpt_model, messages=[{"role": "user", "content": f"{text}"}])
             response_text = response.choices[0].message.content
             print(response_text)
-            #myobj = gTTS(text = response_text, lang = language, slow = False)
-            #myobj.save("test.wav")
-            #os.system("aplay test.wav")
+            myobj = gTTS(text = response_text, lang = language, slow = False)
+            myobj.save("test.wav")
+            os.system("aplay test.wav")
 
-            # # Speak the response
-            # print("speaking")
-            # os.system("espeak ' "+response_text + "'")
-            # engine.say(response_text)
-            # engine.runAndWait()
+            # Speak the response
+            print("speaking")
+            os.system("espeak ' "+response_text + "'")
+            engine.say(response_text)
+            # engine.say('hello world')
+            engine.runAndWait()
 
             if not audio:
                 listen_for_wake_word(source)
